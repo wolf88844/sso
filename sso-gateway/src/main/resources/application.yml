@@ -1,0 +1,50 @@
+server:
+  port: 9000
+spring:
+  application:
+    name: sso-gateway
+  cloud:
+    nacos:
+      discovery:
+        server-addr: localhost
+      config:
+        import-check:
+          enabled: false
+    gateway:
+      routes:
+        - id: router01
+          uri: lb://sso-resource
+          predicates:
+            - Path=/sso/resource/**
+          filters:
+            - StripPrefix=1
+        - id: router02
+          uri: lb://sso-auth
+          predicates:
+            - Path=/sso/oauth/**
+          filters:
+            - StripPrefix=1
+    sentinel:
+      globalcors:
+        cors-configurations:
+          '[/**]':
+            allowed-origins:
+              - "*"
+            allowed-headers:
+              - "*"
+            allowed-methods:
+              - "*"
+            allowed-origin-patterns:
+              - "*"
+            allowCredentials: false
+      transport:
+        dashboard: localhost:5003
+      eager: true
+management:
+  endpoint:
+    health:
+      show-details: always
+  endpoints:
+    web:
+      exposure:
+        include: '*'
